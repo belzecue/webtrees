@@ -23,6 +23,7 @@ use Aura\Router\Route;
 use Aura\Router\RouterContainer;
 use Fig\Http\Message\RequestMethodInterface;
 use Fisharebest\Webtrees\Factories\FamilyFactory;
+use Fisharebest\Webtrees\Factories\GedcomElementFactory;
 use Fisharebest\Webtrees\Factories\GedcomRecordFactory;
 use Fisharebest\Webtrees\Factories\HeaderFactory;
 use Fisharebest\Webtrees\Factories\IndividualFactory;
@@ -92,6 +93,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
         // Register the factories
         Factory::family(new FamilyFactory($cache));
+        Factory::gedcomElement(new GedcomElementFactory());
         Factory::gedcomRecord(new GedcomRecordFactory($cache));
         Factory::header(new HeaderFactory($cache));
         Factory::individual(new IndividualFactory($cache));

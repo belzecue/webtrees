@@ -34,7 +34,6 @@ use Fisharebest\Webtrees\Http\RequestHandlers\AddChildToFamilyAction;
 use Fisharebest\Webtrees\Http\RequestHandlers\AddChildToFamilyPage;
 use Fisharebest\Webtrees\Http\RequestHandlers\AddChildToIndividualAction;
 use Fisharebest\Webtrees\Http\RequestHandlers\AddChildToIndividualPage;
-use Fisharebest\Webtrees\Http\RequestHandlers\AddName;
 use Fisharebest\Webtrees\Http\RequestHandlers\AddNewFact;
 use Fisharebest\Webtrees\Http\RequestHandlers\AddParentToIndividualAction;
 use Fisharebest\Webtrees\Http\RequestHandlers\AddParentToIndividualPage;
@@ -80,7 +79,6 @@ use Fisharebest\Webtrees\Http\RequestHandlers\DeleteTreeAction;
 use Fisharebest\Webtrees\Http\RequestHandlers\DeleteUser;
 use Fisharebest\Webtrees\Http\RequestHandlers\EditFactAction;
 use Fisharebest\Webtrees\Http\RequestHandlers\EditFactPage;
-use Fisharebest\Webtrees\Http\RequestHandlers\EditName;
 use Fisharebest\Webtrees\Http\RequestHandlers\EditRawFactAction;
 use Fisharebest\Webtrees\Http\RequestHandlers\EditRawFactPage;
 use Fisharebest\Webtrees\Http\RequestHandlers\EditRawRecordAction;
@@ -259,6 +257,8 @@ class WebRoutes
                 $router->post('blocks-update', '/blocks', 'Admin\ModuleController::updateBlocks');
                 $router->get('charts', '/charts', 'Admin\ModuleController::listCharts');
                 $router->post('charts-update', '/charts', 'Admin\ModuleController::updateCharts');
+                $router->get('custom-tags', '/custom-tags', 'Admin\ModuleController::listCustomTags');
+                $router->post('custom-tags-update', '/custom-tags', 'Admin\ModuleController::updateCustomTags');
                 $router->get('data-fixes', '/data-fixes', 'Admin\ModuleController::listDataFixes');
                 $router->post('data-fixes-update', '/data-fixes', 'Admin\ModuleController::updateDataFixes');
                 $router->get('lists', '/lists', 'Admin\ModuleController::listLists');
@@ -399,15 +399,14 @@ class WebRoutes
                     ],
                 ]);
 
-                $router->get(AddChildToFamilyPage::class, '/add-child-to-family', AddChildToFamilyPage::class);
-                $router->post(AddChildToFamilyAction::class, '/add-child-to-family', AddChildToFamilyAction::class);
+                $router->get(AddChildToFamilyPage::class, '/add-child-to-family/{xref}/{sex}', AddChildToFamilyPage::class);
+                $router->post(AddChildToFamilyAction::class, '/add-child-to-family/{xref}', AddChildToFamilyAction::class);
                 $router->get(AddNewFact::class, '/add-fact/{xref}/{fact}', AddNewFact::class);
                 $router->post(SelectNewFact::class, '/add-fact/{xref}', SelectNewFact::class);
                 $router->get('add-media-file', '/add-media-file', 'EditMediaController::addMediaFile');
                 $router->post('add-media-file-update', '/add-media-file', 'EditMediaController::addMediaFileAction');
-                $router->get(AddName::class, '/add-name', AddName::class);
-                $router->get(AddSpouseToFamilyPage::class, '/add-spouse-to-family', AddSpouseToFamilyPage::class);
-                $router->post(AddSpouseToFamilyAction::class, '/add-spouse-to-family', AddSpouseToFamilyAction::class);
+                $router->get(AddSpouseToFamilyPage::class, '/add-spouse-to-family/{xref}/{sex}', AddSpouseToFamilyPage::class);
+                $router->post(AddSpouseToFamilyAction::class, '/add-spouse-to-family/{xref}', AddSpouseToFamilyAction::class);
                 $router->get(ChangeFamilyMembersPage::class, '/change-family-members', ChangeFamilyMembersPage::class);
                 $router->post(ChangeFamilyMembersAction::class, '/change-family-members', ChangeFamilyMembersAction::class);
                 $router->get(CreateMediaObjectModal::class, '/create-media-object', CreateMediaObjectModal::class);
@@ -449,19 +448,18 @@ class WebRoutes
                 $router->post(ReorderFamiliesAction::class, '/reorder-spouses/{xref}', ReorderFamiliesAction::class);
                 $router->get(SearchReplacePage::class, '/search-replace', SearchReplacePage::class);
                 $router->post(SearchReplaceAction::class, '/search-replace', SearchReplaceAction::class);
-                $router->get(AddChildToIndividualPage::class, '/add-child-to-individual', AddChildToIndividualPage::class);
-                $router->post(AddChildToIndividualAction::class, '/add-child-to-individual', AddChildToIndividualAction::class);
-                $router->get(AddParentToIndividualPage::class, '/add-parent-to-individual', AddParentToIndividualPage::class);
-                $router->post(AddParentToIndividualAction::class, '/add-parent-to-individual', AddParentToIndividualAction::class);
-                $router->get(AddSpouseToIndividualPage::class, '/add-spouse-to-individual', AddSpouseToIndividualPage::class);
-                $router->post(AddSpouseToIndividualAction::class, '/add-spouse-to-individual', AddSpouseToIndividualAction::class);
+                $router->get(AddChildToIndividualPage::class, '/add-child-to-individual/{xref}', AddChildToIndividualPage::class);
+                $router->post(AddChildToIndividualAction::class, '/add-child-to-individual/{xref}', AddChildToIndividualAction::class);
+                $router->get(AddParentToIndividualPage::class, '/add-parent-to-individual/{xref}/{sex}', AddParentToIndividualPage::class);
+                $router->post(AddParentToIndividualAction::class, '/add-parent-to-individual/{xref}', AddParentToIndividualAction::class);
+                $router->get(AddSpouseToIndividualPage::class, '/add-spouse-to-individual/{xref}', AddSpouseToIndividualPage::class);
+                $router->post(AddSpouseToIndividualAction::class, '/add-spouse-to-individual/{xref}', AddSpouseToIndividualAction::class);
                 $router->get(AddUnlinkedPage::class, '/add-unlinked-individual', AddUnlinkedPage::class);
                 $router->post(AddUnlinkedAction::class, '/add-unlinked-individual', AddUnlinkedAction::class);
-                $router->get(LinkChildToFamilyPage::class, '/link-child-to-family', LinkChildToFamilyPage::class);
-                $router->post(LinkChildToFamilyAction::class, '/link-child-to-family', LinkChildToFamilyAction::class);
-                $router->get(LinkSpouseToIndividualPage::class, '/link-spouse-to-individual', LinkSpouseToIndividualPage::class);
-                $router->post(LinkSpouseToIndividualAction::class, '/link-spouse-to-individual', LinkSpouseToIndividualAction::class);
-                $router->get(EditName::class, '/edit-name/{xref}/{fact_id}', EditName::class);
+                $router->get(LinkChildToFamilyPage::class, '/link-child-to-family/{xref}', LinkChildToFamilyPage::class);
+                $router->post(LinkChildToFamilyAction::class, '/link-child-to-family/{xref}', LinkChildToFamilyAction::class);
+                $router->get(LinkSpouseToIndividualPage::class, '/link-spouse-to-individual/{xref}', LinkSpouseToIndividualPage::class);
+                $router->post(LinkSpouseToIndividualAction::class, '/link-spouse-to-individual/{xref}', LinkSpouseToIndividualAction::class);
             });
 
             // Member routes.

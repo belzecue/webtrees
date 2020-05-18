@@ -23,7 +23,6 @@ use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Exceptions\HttpNotFoundException;
 use Fisharebest\Webtrees\Fact;
 use Fisharebest\Webtrees\Factory;
-use Fisharebest\Webtrees\GedcomTag;
 use Fisharebest\Webtrees\Http\ViewResponseTrait;
 use Fisharebest\Webtrees\Tree;
 use Psr\Http\Message\ResponseInterface;
@@ -71,13 +70,12 @@ class EditFactPage implements RequestHandlerInterface
         }
 
         $can_edit_raw = Auth::isAdmin() || $tree->getPreference('SHOW_GEDCOM_RECORD');
-
-        $title = $record->fullName() . ' - ' . GedcomTag::getLabel($fact->getTag());
+        $element      = Factory::gedcomElement()->make($fact->tag());
+        $title        = $record->fullName() . ' - ' . $element->label();
 
         return $this->viewResponse('edit/edit-fact', [
             'can_edit_raw' => $can_edit_raw,
-            'edit_fact'    => $fact,
-            'record'       => $record,
+            'fact'         => $fact,
             'title'        => $title,
             'tree'         => $tree,
         ]);

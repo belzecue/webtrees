@@ -27,7 +27,6 @@ use Fisharebest\Webtrees\Fact;
 use Fisharebest\Webtrees\Factory;
 use Fisharebest\Webtrees\Functions\FunctionsPrint;
 use Fisharebest\Webtrees\Functions\FunctionsPrintFacts;
-use Fisharebest\Webtrees\GedcomCode\GedcomCodeName;
 use Fisharebest\Webtrees\GedcomTag;
 use Fisharebest\Webtrees\Http\ViewResponseTrait;
 use Fisharebest\Webtrees\I18N;
@@ -283,7 +282,7 @@ class IndividualPage implements RequestHandlerInterface
                     $name = preg_replace('/(\S*)\*/', '<span class="starredname">\\1</span>', $name);
                     switch ($tag) {
                         case 'TYPE':
-                            echo GedcomCodeName::getValue($name, $individual);
+                            echo Factory::gedcomElement()->make('INDI:NAME:TYPE')->value($name, $tree);
                             break;
                         case 'SURN':
                             // The SURN field is not necessarily the surname.
@@ -316,7 +315,7 @@ class IndividualPage implements RequestHandlerInterface
         if ($fact->canEdit()) {
             $edit_links =
                 '<a class="btn btn-link" href="#" data-confirm="' . I18N::translate('Are you sure you want to delete this fact?') . '" data-post-url="' . e(route(DeleteFact::class, ['tree' => $individual->tree()->name(), 'xref' => $individual->xref(), 'fact_id' => $fact->id()])) . '" title="' . I18N::translate('Delete this name') . '">' . view('icons/delete') . '<span class="sr-only">' . I18N::translate('Delete this name') . '</span></a>' .
-                '<a class="btn btn-link" href="' . e(route(EditName::class, ['xref' => $individual->xref(), 'fact_id' => $fact->id(), 'tree' => $individual->tree()->name()])) . '" title="' . I18N::translate('Edit the name') . '">' . view('icons/edit') . '<span class="sr-only">' . I18N::translate('Edit the name') . '</span></a>';
+                '<a class="btn btn-link" href="' . e(route(EditFactPage::class, ['xref' => $individual->xref(), 'fact_id' => $fact->id(), 'tree' => $individual->tree()->name()])) . '" title="' . I18N::translate('Edit the name') . '">' . view('icons/edit') . '<span class="sr-only">' . I18N::translate('Edit the name') . '</span></a>';
         } else {
             $edit_links = '';
         }

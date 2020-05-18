@@ -53,6 +53,8 @@ use const PREG_SET_ORDER;
 
 /**
  * Class FunctionsImport - common functions
+ *
+ * @deprecated since 2.0.6.  Will be removed in 2.1.0
  */
 class FunctionsImport
 {

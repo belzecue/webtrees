@@ -25,6 +25,8 @@ use Fisharebest\Webtrees\Tree;
 
 /**
  * Class FunctionsPrintLists - create sortable lists using datatables.net
+ *
+ * @deprecated since 2.0.6.  Will be removed in 2.1.0
  */
 class FunctionsPrintLists
 {

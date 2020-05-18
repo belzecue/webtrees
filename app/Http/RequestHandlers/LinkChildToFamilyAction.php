@@ -21,13 +21,13 @@ namespace Fisharebest\Webtrees\Http\RequestHandlers;
 
 use Fisharebest\Webtrees\Auth;
 use Fisharebest\Webtrees\Factory;
-use Fisharebest\Webtrees\GedcomCode\GedcomCodePedi;
 use Fisharebest\Webtrees\Tree;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
 use function assert;
+use function is_string;
 use function redirect;
 
 /**
@@ -45,7 +45,8 @@ class LinkChildToFamilyAction implements RequestHandlerInterface
         $tree = $request->getAttribute('tree');
         assert($tree instanceof Tree);
 
-        $xref = $request->getQueryParams()['xref'];
+        $xref = $request->getAttribute('xref');
+        assert(is_string($xref));
 
         $individual = Factory::individual()->make($xref, $tree);
         $individual = Auth::checkIndividualAccess($individual, true);
@@ -68,7 +69,24 @@ class LinkChildToFamilyAction implements RequestHandlerInterface
             }
         }
 
-        $gedcom = GedcomCodePedi::createNewFamcPedi($PEDI, $famid);
+        switch ($PEDI) {
+            case '':
+                $gedcom = "1 FAMC @$famid@";
+                break;
+            case 'adopted':
+                $gedcom = "1 FAMC @$famid@\n2 PEDI $PEDI\n1 ADOP\n2 FAMC @$famid@\n3 ADOP BOTH";
+                break;
+            case 'sealing':
+                $gedcom = "1 FAMC @$famid@\n2 PEDI $PEDI\n1 SLGC\n2 FAMC @$famid@";
+                break;
+            case 'foster':
+                $gedcom = "1 FAMC @$famid@\n2 PEDI $PEDI\n1 EVEN\n2 TYPE $PEDI";
+                break;
+            default:
+                $gedcom = "1 FAMC @$famid@\n2 PEDI $PEDI";
+                break;
+        }
+
         $individual->updateFact($fact_id, $gedcom, true);
 
         // Only set the family->child link if it does not already exist

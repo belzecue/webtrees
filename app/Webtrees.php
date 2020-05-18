@@ -98,7 +98,7 @@ class Webtrees
     public const STABILITY = 'dev';
 
     // Version number
-    public const VERSION = '2.0.7' . (self::STABILITY === '' ? '' : '-') . self::STABILITY;
+    public const VERSION = '2.1.0' . (self::STABILITY === '' ? '' : '-') . self::STABILITY;
 
     // Project website.
     public const URL = 'https://webtrees.net/';

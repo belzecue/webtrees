@@ -21,22 +21,29 @@ namespace Fisharebest\Webtrees;
 
 use Closure;
 use Fisharebest\Webtrees\Functions\FunctionsPrint;
+use Fisharebest\Webtrees\GedcomElements\GedcomElementInterface;
 use Fisharebest\Webtrees\Services\GedcomService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 use function array_flip;
 use function array_key_exists;
+use function array_shift;
 use function count;
 use function e;
+use function explode;
 use function implode;
 use function in_array;
 use function preg_match;
 use function preg_match_all;
 use function preg_replace;
+use function preg_split;
 use function strpos;
+use function substr_count;
 use function usort;
 
+use const PHP_INT_MAX;
 use const PREG_SET_ORDER;
 
 /**
@@ -813,5 +820,71 @@ class Fact
     public function __toString(): string
     {
         return $this->id . '@' . $this->record->xref();
+    }
+
+    /**
+     * Add blank lines, to allow a user to add/edit new values.
+     *
+     * @return string
+     */
+    public function insertMissingSubtags(): string
+    {
+        return $this->insertMissingLevels($this->record()->tree(), $this->tag(), $this->gedcom());
+    }
+
+    /**
+     * @param Tree   $tree
+     * @param string $tag
+     * @param string $gedcom
+     *
+     * @return string
+     */
+    private function insertMissingLevels(Tree $tree, string $tag, string $gedcom): string
+    {
+        $next_level = substr_count($tag, ':') + 1;
+        $factory    = Factory::gedcomElement();
+        $subtags    = $factory->make($tag)->subtags($tree);
+
+        // The first part is level N (includes CONT records).  The remainder are level N+1.
+        $parts  = preg_split('/\n(?=' . $next_level . ')/', $gedcom);
+        $return = array_shift($parts);
+
+        foreach ($subtags as $subtag => $occurrences) {
+            [$min, $max] = explode(':', $occurrences);
+            if ($max === 'M') {
+                $max = PHP_INT_MAX;
+            } else {
+                $max = (int) $max;
+            }
+
+            $count = 0;
+
+            // Add expected subtags in our preferred order.
+            foreach ($parts as $n => $part) {
+                if (Str::startsWith($part, $next_level . ' ' . $subtag)) {
+                    $return .= "\n" . $this->insertMissingLevels($tree, $tag . ':' . $subtag, $part);
+                    $count++;
+                    unset($parts[$n]);
+                }
+            }
+
+            // Allowed to have more of this subtag?
+            if ($count < $max) {
+                // Create a new one.
+                $gedcom  = $next_level . ' ' . $subtag;
+                $default = $factory->make($tag . ':' . $subtag)->default($tree);
+                if ($default !== '') {
+                    $gedcom .= ' ' . $default;
+                }
+                $return .= "\n" . $this->insertMissingLevels($tree, $tag . ':' . $subtag, $gedcom);
+            }
+        }
+
+        // Now add any unexpected/existing data.
+        if ($parts !== []) {
+            $return .= "\n" . implode("\n", $parts);
+        }
+
+        return $return;
     }
 }

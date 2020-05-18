@@ -26,6 +26,7 @@ use Fisharebest\Webtrees\I18N;
 use Fisharebest\Webtrees\Module\ModuleAnalyticsInterface;
 use Fisharebest\Webtrees\Module\ModuleBlockInterface;
 use Fisharebest\Webtrees\Module\ModuleChartInterface;
+use Fisharebest\Webtrees\Module\ModuleCustomTagsInterface;
 use Fisharebest\Webtrees\Module\ModuleDataFixInterface;
 use Fisharebest\Webtrees\Module\ModuleFooterInterface;
 use Fisharebest\Webtrees\Module\ModuleHistoricEventsInterface;
@@ -127,6 +128,20 @@ class ModuleController extends AbstractAdminController
         return $this->listComponents(
             ModuleChartInterface::class,
             view('icons/chart') . I18N::translate('Charts'),
+            ''
+        );
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */
+    public function listCustomTags(ServerRequestInterface $request): ResponseInterface
+    {
+        return $this->listComponents(
+            ModuleCustomTagsInterface::class,
+            view('icons/tag') . I18N::translate('Custom tags'),
             ''
         );
     }
@@ -399,6 +414,22 @@ class ModuleController extends AbstractAdminController
         FlashMessages::addMessage(I18N::translate('The website preferences have been updated.'), 'success');
 
         return redirect(route('charts'));
+    }
+
+    /**
+     * @param ServerRequestInterface $request
+     *
+     * @return ResponseInterface
+     */
+    public function updateCustomTags(ServerRequestInterface $request): ResponseInterface
+    {
+        $modules = $this->module_service->findByInterface(ModuleCustomTagsInterface::class, true);
+
+        $this->updateStatus($modules, $request);
+
+        FlashMessages::addMessage(I18N::translate('The website preferences have been updated.'), 'success');
+
+        return redirect(route('languages'));
     }
 
     /**
